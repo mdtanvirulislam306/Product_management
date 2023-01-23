@@ -5,6 +5,7 @@
         <h1 class="h3 mb-0 text-gray-800">Edit Product</h1>
     </div>
     <form action="">
+        @csrf
         <section>
             <div class="row">
                 <div class="col-md-6">
@@ -19,6 +20,7 @@
                                 <input type="text"
                                        name="product_name"
                                        id="product_name"
+                                       value="{{ $product->title?? $product->title}}"
                                        required
                                        placeholder="Product Name"
                                        class="form-control">
@@ -28,6 +30,7 @@
                                 <input type="text" name="product_sku"
                                        id="product_sku"
                                        required
+                                       value="{{ $product->sku?? $product->sku}}"
                                        placeholder="Product Name"
                                        class="form-control"></div>
                             <div class="form-group mb-0">
@@ -36,7 +39,9 @@
                                           id="product_description"
                                           required
                                           rows="4"
-                                          class="form-control"></textarea>
+                                          class="form-control">
+                                          {{ $product->description ?? $product->description}}
+                                        </textarea>
                             </div>
                         </div>
                     </div>

@@ -1,21 +1,25 @@
 @extends('layouts.app')
 
 @section('content')
-
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Products</h1>
     </div>
-
-
     <div class="card">
         <form action="" method="get" class="card-header">
             <div class="form-row justify-content-between">
                 <div class="col-md-2">
-                    <input type="text" name="title" placeholder="Product Title" class="form-control">
+                    <input type="text" name="title" id="title" placeholder="Product Title" class="form-control">
                 </div>
                 <div class="col-md-2">
-                    <select name="variant" id="" class="form-control">
-
+                    <select name="variant" id="variant" class="form-control">
+                        <option> -- Select Variant -- </option>
+                        @foreach(App\Models\Variant::all() as $variant)
+                            <optgroup label="{{ $variant->title }}">
+                                @foreach($variant->product_variant as $variant_option)
+                                    <option value="{{ $variant_option->variant}}">{{ $variant_option->variant}}</option>
+                                @endforeach
+                            </optgroup>
+                        @endforeach
                     </select>
                 </div>
 
@@ -24,60 +28,35 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text">Price Range</span>
                         </div>
-                        <input type="text" name="price_from" aria-label="First name" placeholder="From" class="form-control">
-                        <input type="text" name="price_to" aria-label="Last name" placeholder="To" class="form-control">
+                        <input type="text" name="price_from" id="price_from" aria-label="First name" placeholder="From" class="form-control">
+                        <input type="text" name="price_to" id="price_to" aria-label="Last name" placeholder="To" class="form-control">
                     </div>
                 </div>
                 <div class="col-md-2">
-                    <input type="date" name="date" placeholder="Date" class="form-control">
+                    <input type="date" name="date" id="filter_date" placeholder="Date" class="form-control">
                 </div>
                 <div class="col-md-1">
-                    <button type="submit" class="btn btn-primary float-right"><i class="fa fa-search"></i></button>
+                    <button type="button" id="filterBtn" class="btn btn-primary float-right"><i class="fa fa-search"></i></button>
                 </div>
             </div>
         </form>
 
         <div class="card-body">
             <div class="table-response">
-                <table class="table">
+                <table class="table" id="dataTable">
                     <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Title</th>
-                        <th>Description</th>
-                        <th>Variant</th>
-                        <th width="150px">Action</th>
-                    </tr>
+                        <tr>
+                            <th>#</th>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Variant</th>
+                            <th width="150px">Action</th>
+                        </tr>
                     </thead>
 
                     <tbody>
 
-                    <tr>
-                        <td>1</td>
-                        <td>T-Shirt <br> Created at : 25-Aug-2020</td>
-                        <td>Quality product in low cost</td>
-                        <td>
-                            <dl class="row mb-0" style="height: 80px; overflow: hidden" id="variant">
-
-                                <dt class="col-sm-3 pb-0">
-                                    SM/ Red/ V-Nick
-                                </dt>
-                                <dd class="col-sm-9">
-                                    <dl class="row mb-0">
-                                        <dt class="col-sm-4 pb-0">Price : {{ number_format(200,2) }}</dt>
-                                        <dd class="col-sm-8 pb-0">InStock : {{ number_format(50,2) }}</dd>
-                                    </dl>
-                                </dd>
-                            </dl>
-                            <button onclick="$('#variant').toggleClass('h-auto')" class="btn btn-sm btn-link">Show more</button>
-                        </td>
-                        <td>
-                            <div class="btn-group btn-group-sm">
-                                <a href="{{ route('product.edit', 1) }}" class="btn btn-success">Edit</a>
-                            </div>
-                        </td>
-                    </tr>
-
+                        
                     </tbody>
 
                 </table>
@@ -85,16 +64,76 @@
 
         </div>
 
-        <div class="card-footer">
-            <div class="row justify-content-between">
-                <div class="col-md-6">
-                    <p>Showing 1 to 10 out of 100</p>
-                </div>
-                <div class="col-md-2">
-
-                </div>
-            </div>
-        </div>
+        
     </div>
 
+
+  
+
+
+    <script type="text/javascript">
+        
+        function getData(title = '', variant = '', price_from='', price_to= '', filter_date= ''){
+            var table = jQuery('#dataTable').DataTable({
+                dom: 'Brftlip',
+                buttons: ['csv', 'excel', 'pdf', 'print'],
+                responsive: true,
+                processing: true,
+                serverSide: true,
+                autoWidth: false,
+                lengthChange:false,
+                searching: false,
+                ajax: {
+                    url: "{{ url('fetech/product/data') }}"+"?title="+title+"&variant="+variant+"&price_from="+price_from+"&price_to="+price_to+"&filter_date="+filter_date,
+                    type: 'GET',
+                },
+                
+                columns: [{
+                        data: 'id',
+                        "className": "text-center",
+                        orderable: true,
+                        searchable: false,
+                    },
+                    {
+                        data: 'title',
+                        name: 'product.title'
+                    },
+                    {
+                        data: 'description',
+                        name: 'description'
+                    },
+                    {
+                        data: 'varient',
+                        name: 'varient',
+                        orderable: false,
+                        searchable: false,
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false,
+                        "className": "text-center"
+                    },
+                ]
+            })
+        }
+        
+        //jQuery('#dataTable').DataTable().destroy();
+        getData();
+        jQuery('#filterBtn').click(function(){
+            let title = jQuery('#title').val();
+            let variant = jQuery('#variant').val();
+            let price_from = jQuery('#price_from').val();
+            let price_to = jQuery('#price_to').val();
+            let filter_date = jQuery('#filter_date').val();
+            //jQuery('#dataTable').DataTable().destroy();
+            // $('#dataTable').DataTable().ajax.reload();
+            getData(title,variant,price_from,price_to,filter_date);
+        })
+        jQuery('#showMore').click(function(){
+            $("#variant").addClass("h-auto");
+        })
+
+    </script>
 @endsection

@@ -29008,4 +29008,6 @@ a.text-dark:focus {
 .select2-container--classic.select2-container--open .select2-dropdown {
   border-color: #5897fb;
 }
-
+.h-auto{
+    height: auto !important;
+}
